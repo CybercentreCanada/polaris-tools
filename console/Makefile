@@ -24,6 +24,7 @@ SHELL = /usr/bin/env bash -o pipefail
 DOCKER ?= docker
 DOCKER_IMAGE_NAME ?= apache/polaris-console
 DOCKER_IMAGE_TAG ?= latest
+DOCKER_BUILD_ARGS ?=
 
 ## Version information
 BUILD_VERSION := $(shell grep version package.json | sed 's/.*"version": "\(.*\)".*/\1/')
@@ -51,7 +52,7 @@ build: lint ## Build console project
 .PHONY: build-docker
 build-docker: install ## Build docker image for console project
 	@echo "--- Building docker image for console project---"
-	@$(DOCKER) build -f docker/Dockerfile -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
+	@$(DOCKER) build $(DOCKER_BUILD_ARGS) -f docker/Dockerfile -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
 	@echo "--- Docker image for console project built ---"
 
 .PHONY: dev

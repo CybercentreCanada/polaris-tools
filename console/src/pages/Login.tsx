@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { Info } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
@@ -38,6 +38,7 @@ export function Login() {
   const [loading, setLoading] = useState(false)
   const { login, loginWithOIDC } = useAuth()
   const navigate = useNavigate()
+  const oidcAutoRedirectTriggered = useRef(false)
   const isOIDCConfigured = !!(
     config.OIDC_ISSUER_URL &&
     config.OIDC_CLIENT_ID &&
@@ -51,6 +52,19 @@ export function Login() {
       sessionStorage.removeItem("auth_error")
     }
   }, [])
+
+  useEffect(() => {
+    if (!isOIDCConfigured || !config.OIDC_AUTO_REDIRECT || oidcAutoRedirectTriggered.current) {
+      return
+    }
+
+    if (sessionStorage.getItem("auth_error")) {
+      return
+    }
+
+    oidcAutoRedirectTriggered.current = true
+    void handleOIDCLogin()
+  }, [isOIDCConfigured])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -174,7 +188,7 @@ export function Login() {
                     onClick={handleOIDCLogin}
                     disabled={loading}
                   >
-                    {loading ? "Redirecting..." : "Sign in with OIDC"}
+                    {loading ? "Redirecting..." : config.OIDC_BUTTON_LABEL}
                   </Button>
                 </>
               )}

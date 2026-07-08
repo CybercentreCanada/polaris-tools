@@ -121,6 +121,7 @@ export const authApi = {
     const clientId = config.OIDC_CLIENT_ID
     const redirectUri = config.OIDC_REDIRECT_URI
     const scope = config.OIDC_SCOPE
+    const prompt = config.OIDC_PROMPT
 
     if (!issuerUrl || !clientId || !redirectUri) {
       throw new Error("OIDC configuration is incomplete. Please check environment variables.")
@@ -145,8 +146,11 @@ export const authApi = {
       state: state,
       code_challenge: challenge,
       code_challenge_method: "S256",
-      prompt: "login",
     })
+
+    if (prompt) {
+      params.append("prompt", prompt)
+    }
 
     window.location.href = `${authorizationUrl}?${params.toString()}`
   },

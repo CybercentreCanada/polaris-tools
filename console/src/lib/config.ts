@@ -27,6 +27,9 @@ interface AppConfig {
   VITE_OIDC_CLIENT_ID?: string
   VITE_OIDC_REDIRECT_URI?: string
   VITE_OIDC_SCOPE?: string
+  VITE_OIDC_PROMPT?: string
+  VITE_OIDC_AUTO_REDIRECT?: string
+  VITE_OIDC_BUTTON_LABEL?: string
 }
 
 declare global {
@@ -49,6 +52,15 @@ function getConfig(key: keyof AppConfig, defaultValue: string = ""): string {
   return defaultValue
 }
 
+function getBooleanConfig(key: keyof AppConfig, defaultValue: boolean = false): boolean {
+  const value = getConfig(key)
+  if (value === "") {
+    return defaultValue
+  }
+
+  return value.toLowerCase() === "true"
+}
+
 export const config = {
   POLARIS_API_URL: getConfig("VITE_POLARIS_API_URL", ""),
   POLARIS_REALM: getConfig("VITE_POLARIS_REALM", "POLARIS"),
@@ -59,4 +71,7 @@ export const config = {
   OIDC_CLIENT_ID: getConfig("VITE_OIDC_CLIENT_ID", ""),
   OIDC_REDIRECT_URI: getConfig("VITE_OIDC_REDIRECT_URI", ""),
   OIDC_SCOPE: getConfig("VITE_OIDC_SCOPE", "openid profile email"),
+  OIDC_PROMPT: getConfig("VITE_OIDC_PROMPT", ""),
+  OIDC_AUTO_REDIRECT: getBooleanConfig("VITE_OIDC_AUTO_REDIRECT", false),
+  OIDC_BUTTON_LABEL: getConfig("VITE_OIDC_BUTTON_LABEL", "Sign in with OIDC"),
 }

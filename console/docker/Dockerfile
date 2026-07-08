@@ -24,6 +24,9 @@ ENV VITE_POLARIS_REALM=POLARIS
 ENV VITE_POLARIS_PRINCIPAL_SCOPE=PRINCIPAL_ROLE:ALL
 ENV VITE_OAUTH_TOKEN_URL=http://polaris:8181/api/catalog/v1/oauth/tokens
 ENV VITE_POLARIS_REALM_HEADER_NAME=Polaris-Realm
+ENV VITE_OIDC_PROMPT=
+ENV VITE_OIDC_AUTO_REDIRECT=false
+ENV VITE_OIDC_BUTTON_LABEL=Sign\ in\ with\ OIDC
 
 USER root
 
@@ -33,7 +36,8 @@ WORKDIR /app
 COPY package.json ./
 
 # Install dependencies
-RUN npm install
+ARG NPM_CONFIG_STRICT_SSL=true
+RUN npm config set strict-ssl ${NPM_CONFIG_STRICT_SSL} && npm install
 
 # Copy source code (excluding docker directory via .dockerignore)
 COPY . .
@@ -46,15 +50,14 @@ FROM registry.access.redhat.com/ubi9/nginx-126:9.7-1767846422
 USER root
 RUN groupadd --gid 10001 polaris && \
     useradd --uid 10000 --gid polaris polaris
-# Copy DISCLAIMER, LICENSE, NOTICE files
-COPY DISCLAIMER /DISCLAIMER
-COPY LICENSE-BUNDLE /LICENSE
+# Copy LICENSE and NOTICE files
+COPY LICENSE /LICENSE
+COPY LICENSE-BUNDLE /LICENSE-BUNDLE
 COPY NOTICE /NOTICE
-
 # Copy custom nginx configuration as template
 COPY docker/nginx.conf /opt/app-root/etc/nginx.d/default.conf.template
 # Copy runtime config generation script
-COPY --chown=10000:10001 --chmod=744 docker/generate-config.sh /generate-config.sh
+COPY --chown=10000:10001 --chmod=755 docker/generate-config.sh /generate-config.sh
 # Copy built application from builder stage
 COPY --from=builder /app/dist /opt/app-root/src
 
