@@ -112,6 +112,8 @@ class ReadUpdateTreeDataset extends Simulation {
     .acceptHeader("application/json")
     .contentTypeHeader("application/json")
     .disableCaching
+    .shareConnections
+    .maxConnectionsPerHost(50)
 
   // Get the configured throughput and duration
   private val throughput = wp.readUpdateTreeDataset.throughput
@@ -124,7 +126,8 @@ class ReadUpdateTreeDataset extends Simulation {
       .andThen(
         readWriteScenario
           .inject(
-            constantUsersPerSec(throughput).during(durationInMinutes.minutes).randomized
+            rampUsersPerSec(1).to(throughput).during(5.minutes),
+            constantUsersPerSec(throughput).during((durationInMinutes - 5).minutes).randomized
           )
           .protocols(httpProtocol)
       )
