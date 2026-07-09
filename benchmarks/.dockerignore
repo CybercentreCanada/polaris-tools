@@ -1,0 +1,4 @@
+.git
+build/reports
+build/tmp
+gradle-cache/

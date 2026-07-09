@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: polaris-loadtest
+  namespace: polaris
+  labels:
+    app: polaris-loadtest
+spec:
+  # Run multiple pods in parallel for distributed load
+  parallelism: 5
+  completions: 5
+  # Don't retry on failure
+  backoffLimit: 0
+  # Clean up after 1 hour
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: polaris-loadtest
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: loadtest
+          image: uchimera.azurecr.io/cccs/ap/polaris-loadtest:latest
+          env:
+            - name: SIMULATION
+              value: ReadUpdateTreeDataset
+            - name: CONFIG_FILE
+              value: pb-autoscaling-test.conf
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POLARIS_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: root-user
+                  key: username
+            - name: POLARIS_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: root-user
+                  key: password
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+      imagePullSecrets: []
+---
+# Override the base-url to use cluster-internal service (no ingress)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: polaris-loadtest-config
+  namespace: polaris
+data:
+  # Overlay conf that overrides base-url to internal service
+  # Mount this and set CONFIG_FILE to point to it if needed
+  override.conf: |
+    include "pb-autoscaling-test.conf"
+    http {
+      base-url = "http://polaris.polaris.svc.cluster.local:8181"
+    }
+    workload {
+      read-update-tree-dataset {
+        throughput = 200
+        duration-in-minutes = 15
+      }
+      create-tree-dataset {
+        table-concurrency = 15
+        view-concurrency = 10
+      }
+    }
