@@ -36,8 +36,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Install dependencies
-ARG NPM_CONFIG_STRICT_SSL=true
-RUN npm config set strict-ssl ${NPM_CONFIG_STRICT_SSL} && npm install
+RUN npm install --strict-ssl=false --verbose
 
 # Copy source code (excluding docker directory via .dockerignore)
 COPY . .
@@ -62,7 +61,7 @@ COPY --from=builder /app/dist /opt/app-root/src
 
 RUN chown -R polaris:polaris /opt/app-root
 # Expose port 8080
-EXPOSE 8080
+EXPOSE 8999
 RUN chown -R polaris:polaris /var/log/nginx \
     && chown -R polaris:polaris /etc/nginx/conf.d \
     && chown -R polaris:polaris /var/lib/nginx \
