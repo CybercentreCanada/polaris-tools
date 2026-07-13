@@ -58,6 +58,9 @@ VITE_OIDC_ISSUER_URL=http://localhost:8080/realms/EXTERNAL
 VITE_OIDC_CLIENT_ID=polaris-console
 VITE_OIDC_REDIRECT_URI=http://localhost:5173/auth/callback
 VITE_OIDC_SCOPE=openid profile email
+VITE_OIDC_PROMPT=select_account
+VITE_OIDC_AUTO_REDIRECT=false
+VITE_OIDC_BUTTON_LABEL=Sign in with Microsoft Entra
 ```
 
 > **Note:** The console makes direct API calls to the Polaris server. Ensure CORS is properly configured on the server (see below).
@@ -144,6 +147,9 @@ VITE_OIDC_ISSUER_URL=http://keycloak:18080/realms/EXTERNAL
 VITE_OIDC_CLIENT_ID=polaris-console
 VITE_OIDC_REDIRECT_URI=http://localhost:5173/auth/callback
 VITE_OIDC_SCOPE=openid profile email
+VITE_OIDC_PROMPT=select_account
+VITE_OIDC_AUTO_REDIRECT=false
+VITE_OIDC_BUTTON_LABEL=Sign in with Microsoft Entra
 ```
 
 **Configuration Details:**
@@ -152,6 +158,9 @@ VITE_OIDC_SCOPE=openid profile email
 - `VITE_OIDC_CLIENT_ID`: Client ID registered with your OIDC provider
 - `VITE_OIDC_REDIRECT_URI`: Callback URL where the OIDC provider redirects after authentication (must match your app URL + `/auth/callback`)
 - `VITE_OIDC_SCOPE`: OAuth scopes to request (typically `openid profile email`)
+- `VITE_OIDC_PROMPT`: Optional prompt behavior (`login`, `select_account`, `consent`, `none`)
+- `VITE_OIDC_AUTO_REDIRECT`: When `true`, automatically starts OIDC login when visiting `/login`
+- `VITE_OIDC_BUTTON_LABEL`: Custom label for the external IdP sign-in button
 
 #### OIDC Provider Setup (Keycloak Example)
 

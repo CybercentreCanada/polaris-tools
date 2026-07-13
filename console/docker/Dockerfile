@@ -24,6 +24,9 @@ ENV VITE_POLARIS_REALM=POLARIS
 ENV VITE_POLARIS_PRINCIPAL_SCOPE=PRINCIPAL_ROLE:ALL
 ENV VITE_OAUTH_TOKEN_URL=http://polaris:8181/api/catalog/v1/oauth/tokens
 ENV VITE_POLARIS_REALM_HEADER_NAME=Polaris-Realm
+ENV VITE_OIDC_PROMPT=
+ENV VITE_OIDC_AUTO_REDIRECT=false
+ENV VITE_OIDC_BUTTON_LABEL=Sign\ in\ with\ OIDC
 
 USER root
 
@@ -33,7 +36,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --strict-ssl=false --verbose
 
 # Copy source code (excluding docker directory via .dockerignore)
 COPY . .
@@ -49,17 +52,16 @@ RUN groupadd --gid 10001 polaris && \
 # Copy LICENSE-BUNDLE and NOTICE files
 COPY LICENSE-BUNDLE /LICENSE
 COPY NOTICE /NOTICE
-
 # Copy custom nginx configuration as template
 COPY docker/nginx.conf /opt/app-root/etc/nginx.d/default.conf.template
 # Copy runtime config generation script
-COPY --chown=10000:10001 --chmod=744 docker/generate-config.sh /generate-config.sh
+COPY --chown=10000:10001 --chmod=755 docker/generate-config.sh /generate-config.sh
 # Copy built application from builder stage
 COPY --from=builder /app/dist /opt/app-root/src
 
 RUN chown -R polaris:polaris /opt/app-root
 # Expose port 8080
-EXPOSE 8080
+EXPOSE 8999
 RUN chown -R polaris:polaris /var/log/nginx \
     && chown -R polaris:polaris /etc/nginx/conf.d \
     && chown -R polaris:polaris /var/lib/nginx \
